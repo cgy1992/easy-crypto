@@ -2,48 +2,148 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>本地文本加解密</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>加密笔记</title>
 
 <style>
-body{
-  font-family:sans-serif;
-  max-width:900px;
-  margin:20px auto;
-  padding:16px;
-  background:#f5f5f5;
-}
-h2{
-  margin-bottom:10px;
-}
-textarea,input{
-  width:100%;
+*{
   box-sizing:border-box;
-  margin-top:8px;
-  margin-bottom:16px;
+}
+
+body{
+  margin:0;
+  padding:16px;
+  background:#f3f4f6;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:#111827;
+}
+
+.card{
+  max-width:920px;
+  margin:auto;
+  background:#fff;
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+h1{
+  margin:0 0 10px;
+  font-size:28px;
+}
+
+.tip{
+  background:#eef6ff;
+  border-radius:12px;
+  padding:12px;
+  line-height:1.7;
+  margin-bottom:18px;
+  color:#374151;
+}
+
+label{
+  display:block;
+  margin-top:16px;
+  margin-bottom:6px;
+  font-weight:600;
+}
+
+textarea,
+input,
+select{
+  width:100%;
+  border:1px solid #d1d5db;
+  border-radius:12px;
   padding:12px;
   font-size:16px;
+  background:#fff;
 }
+
 textarea{
-  min-height:160px;
+  min-height:220px;
   resize:vertical;
 }
+
+.row{
+  display:flex;
+  gap:12px;
+}
+
+.row > div{
+  flex:1;
+}
+
+.actions{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+
 button{
-  padding:12px 18px;
-  font-size:16px;
-  margin-right:10px;
-  margin-bottom:10px;
-  cursor:pointer;
-}
-.card{
-  background:white;
-  padding:16px;
+  flex:1;
+  min-width:120px;
+  border:none;
   border-radius:12px;
-  box-shadow:0 2px 10px rgba(0,0,0,.08);
+  padding:14px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  background:#2563eb;
+  color:white;
 }
-.tip{
-  color:#666;
+
+button.secondary{
+  background:#6b7280;
+}
+
+button.success{
+  background:#059669;
+}
+
+.info{
+  margin-top:14px;
+  color:#6b7280;
   font-size:14px;
+}
+
+.hidden{
+  display:none;
+}
+
+@media(max-width:700px){
+  .row{
+    flex-direction:column;
+  }
+}
+
+@media(prefers-color-scheme:dark){
+
+  body{
+    background:#0d1117;
+    color:#e6edf3;
+  }
+
+  .card{
+    background:#161b22;
+  }
+
+  textarea,
+  input,
+  select{
+    background:#0d1117;
+    color:#e6edf3;
+    border:1px solid #30363d;
+  }
+
+  .tip{
+    background:#1f2937;
+    color:#cbd5e1;
+  }
+
+  .info{
+    color:#9ca3af;
+  }
 }
 </style>
 </head>
@@ -51,91 +151,213 @@ button{
 <body>
 
 <div class="card">
-  <h2>本地文本加解密（AES-GCM）</h2>
+
+  <h1>🔐 加密笔记</h1>
 
   <div class="tip">
-    所有加解密均在本地浏览器完成，不上传服务器。<br>
-    支持 Windows / macOS / Linux / Android / iPhone。
+    所有加解密均在浏览器本地完成。<br>
+    支持：
+    <br>• 本地模式（文件下载/上传）
+    <br>• GitHub 仓库模式（自动保存）
   </div>
 
-  <label>输入文本（明文或密文 JSON）</label>
+  <div class="row">
+
+    <div>
+      <label>模式</label>
+
+      <select id="mode">
+        <option value="local">本地文件模式</option>
+        <option value="github">GitHub 仓库模式</option>
+      </select>
+    </div>
+
+    <div id="githubFileArea">
+      <label>仓库文件</label>
+
+      <select id="fileList">
+        <option value="">请选择文件</option>
+      </select>
+    </div>
+
+  </div>
+
+  <label>文件名</label>
+  <input id="fileName" placeholder="例如：note1.json" />
+
+  <div id="localArea">
+
+    <label>导入本地文件</label>
+
+    <input type="file" id="localFileInput" />
+
+  </div>
+
+  <label>输入内容（明文或密文 JSON）</label>
+
   <textarea id="input"></textarea>
 
   <label>密码</label>
+
   <input id="password" type="password" placeholder="请输入密码" />
 
-  <button onclick="encryptText()">加密</button>
-  <button onclick="decryptText()">解密</button>
-  <button onclick="copyOutput()">复制结果</button>
+  <div class="actions">
+
+    <button onclick="encryptText()">
+      加密并保存
+    </button>
+
+    <button class="success" onclick="decryptText()">
+      解密
+    </button>
+
+    <button class="secondary" onclick="copyOutput()">
+      复制结果
+    </button>
+
+  </div>
 
   <label>结果</label>
+
   <textarea id="output" readonly></textarea>
+
+  <div class="info" id="status">
+    正在初始化...
+  </div>
+
 </div>
 
 <script>
-function bytesToBase64(bytes) {
+let CONFIG = null;
+
+const mode = document.getElementById("mode");
+const input = document.getElementById("input");
+const output = document.getElementById("output");
+const fileName = document.getElementById("fileName");
+const fileList = document.getElementById("fileList");
+
+mode.addEventListener("change", updateModeUI);
+
+function updateModeUI(){
+
+  const githubMode = mode.value === "github";
+
+  document.getElementById("githubFileArea").style.display =
+    githubMode ? "block" : "none";
+}
+
+async function init(){
+
+  updateModeUI();
+
+  if(location.protocol === "file:"){
+
+    setStatus("✅ 当前为本地模式（未连接 GitHub）");
+    return;
+  }
+
+  try{
+
+    const res = await fetch("./config.json");
+
+    if(!res.ok){
+      throw new Error();
+    }
+
+    CONFIG = await res.json();
+
+    setStatus(
+      `✅ 已连接 GitHub：${CONFIG.owner}/${CONFIG.repo}`
+    );
+
+    await loadFileList();
+
+  }catch(e){
+
+    setStatus(
+      "⚠️ 未找到 config.json，仅支持本地模式"
+    );
+  }
+}
+
+function bytesToBase64(bytes){
+
   let binary = "";
+
   bytes.forEach(b => binary += String.fromCharCode(b));
+
   return btoa(binary);
 }
 
-function base64ToBytes(base64) {
+function base64ToBytes(base64){
+
   const binary = atob(base64);
+
   const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
+
+  for(let i=0;i<binary.length;i++){
     bytes[i] = binary.charCodeAt(i);
   }
+
   return bytes;
 }
 
-async function deriveKey(password, salt) {
+async function deriveKey(password, salt){
+
   const enc = new TextEncoder();
 
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
     enc.encode(password),
-    { name: "PBKDF2" },
+    { name:"PBKDF2" },
     false,
     ["deriveKey"]
   );
 
   return crypto.subtle.deriveKey(
     {
-      name: "PBKDF2",
+      name:"PBKDF2",
       salt,
-      iterations: 100000,
-      hash: "SHA-256"
+      iterations:100000,
+      hash:"SHA-256"
     },
     keyMaterial,
     {
-      name: "AES-GCM",
-      length: 256
+      name:"AES-GCM",
+      length:256
     },
     false,
-    ["encrypt", "decrypt"]
+    ["encrypt","decrypt"]
   );
 }
 
-async function encryptText() {
-  try {
-    const text = document.getElementById("input").value;
-    const password = document.getElementById("password").value;
+async function encryptText(){
 
-    if (!text || !password) {
-      alert("请输入文本和密码");
+  try{
+
+    const text = input.value;
+    const password = getPassword();
+
+    if(!text || !password){
+      alert("请输入内容和密码");
       return;
     }
 
     const enc = new TextEncoder();
 
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const salt = crypto.getRandomValues(
+      new Uint8Array(16)
+    );
+
+    const iv = crypto.getRandomValues(
+      new Uint8Array(12)
+    );
 
     const key = await deriveKey(password, salt);
 
     const encrypted = await crypto.subtle.encrypt(
       {
-        name: "AES-GCM",
+        name:"AES-GCM",
         iv
       },
       key,
@@ -143,30 +365,55 @@ async function encryptText() {
     );
 
     const result = {
-      v: 1,
-      salt: bytesToBase64(salt),
-      iv: bytesToBase64(iv),
-      data: bytesToBase64(new Uint8Array(encrypted))
+      v:1,
+      salt:bytesToBase64(salt),
+      iv:bytesToBase64(iv),
+      data:bytesToBase64(
+        new Uint8Array(encrypted)
+      )
     };
 
-    document.getElementById("output").value =
-      JSON.stringify(result);
-  } catch (e) {
+    const json =
+      JSON.stringify(result, null, 2);
+
+    output.value = json;
+
+    if(mode.value === "github"){
+
+      if(!CONFIG){
+        alert("GitHub 未配置");
+        return;
+      }
+
+      await saveToGitHub(json);
+
+    }else{
+
+      downloadLocalFile(json);
+
+    }
+
+    setStatus("✅ 加密完成");
+
+  }catch(e){
+
     alert("加密失败：" + e.message);
   }
 }
 
-async function decryptText() {
-  try {
-    const input = document.getElementById("input").value;
-    const password = document.getElementById("password").value;
+async function decryptText(){
 
-    if (!input || !password) {
+  try{
+
+    const content = input.value;
+    const password = getPassword();
+
+    if(!content || !password){
       alert("请输入密文和密码");
       return;
     }
 
-    const obj = JSON.parse(input);
+    const obj = JSON.parse(content);
 
     const salt = base64ToBytes(obj.salt);
     const iv = base64ToBytes(obj.iv);
@@ -174,36 +421,221 @@ async function decryptText() {
 
     const key = await deriveKey(password, salt);
 
-    const decrypted = await crypto.subtle.decrypt(
-      {
-        name: "AES-GCM",
-        iv
-      },
-      key,
-      data
-    );
+    const decrypted =
+      await crypto.subtle.decrypt(
+        {
+          name:"AES-GCM",
+          iv
+        },
+        key,
+        data
+      );
 
     const dec = new TextDecoder();
 
-    document.getElementById("output").value =
+    output.value =
       dec.decode(decrypted);
 
-  } catch (e) {
+    setStatus("✅ 解密成功");
+
+  }catch(e){
+
     alert("解密失败：密码错误或密文损坏");
   }
 }
 
-async function copyOutput() {
-  const text = document.getElementById("output").value;
+async function saveToGitHub(content){
 
-  if (!text) {
+  const path = fileName.value.trim();
+
+  if(!path){
+    alert("请输入文件名");
+    return;
+  }
+
+  const api =
+    `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`;
+
+  let sha = null;
+
+  const check = await fetch(api,{
+    headers:{
+      Authorization:`Bearer ${CONFIG.token}`
+    }
+  });
+
+  if(check.ok){
+
+    const file = await check.json();
+
+    sha = file.sha;
+  }
+
+  const res = await fetch(api,{
+    method:"PUT",
+    headers:{
+      Authorization:`Bearer ${CONFIG.token}`,
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      message:`update ${path}`,
+      content:btoa(
+        unescape(
+          encodeURIComponent(content)
+        )
+      ),
+      sha
+    })
+  });
+
+  if(!res.ok){
+    throw new Error("GitHub 保存失败");
+  }
+
+  await loadFileList();
+
+  setStatus("✅ 已保存到 GitHub");
+}
+
+function downloadLocalFile(content){
+
+  const path =
+    fileName.value.trim() || "encrypted.json";
+
+  const blob = new Blob(
+    [content],
+    { type:"application/json" }
+  );
+
+  const url =
+    URL.createObjectURL(blob);
+
+  const a =
+    document.createElement("a");
+
+  a.href = url;
+  a.download = path;
+
+  a.click();
+
+  URL.revokeObjectURL(url);
+
+  setStatus("✅ 已下载到本地");
+}
+
+async function loadFileList(){
+
+  if(!CONFIG) return;
+
+  const api =
+    `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents`;
+
+  const res = await fetch(api,{
+    headers:{
+      Authorization:`Bearer ${CONFIG.token}`
+    }
+  });
+
+  const files = await res.json();
+
+  fileList.innerHTML =
+    `<option value="">请选择文件</option>`;
+
+  files.forEach(file => {
+
+    if(file.type !== "file") return;
+
+    const option =
+      document.createElement("option");
+
+    option.value = file.path;
+    option.innerText = file.name;
+
+    fileList.appendChild(option);
+
+  });
+}
+
+fileList.addEventListener("change", async ()=>{
+
+  const path = fileList.value;
+
+  if(!path) return;
+
+  fileName.value = path;
+
+  const api =
+    `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`;
+
+  const res = await fetch(api,{
+    headers:{
+      Authorization:`Bearer ${CONFIG.token}`
+    }
+  });
+
+  const file = await res.json();
+
+  const content =
+    decodeURIComponent(
+      escape(
+        atob(
+          file.content.replace(/\n/g,"")
+        )
+      )
+    );
+
+  input.value = content;
+
+  setStatus("✅ 文件已加载");
+});
+
+document.getElementById("localFileInput")
+.addEventListener("change", e => {
+
+  const file = e.target.files[0];
+
+  if(!file) return;
+
+  fileName.value = file.name;
+
+  const reader = new FileReader();
+
+  reader.onload = ev => {
+
+    input.value = ev.target.result;
+
+    setStatus("✅ 本地文件已加载");
+  };
+
+  reader.readAsText(file);
+});
+
+async function copyOutput(){
+
+  const text = output.value;
+
+  if(!text){
     alert("没有可复制内容");
     return;
   }
 
   await navigator.clipboard.writeText(text);
-  alert("已复制");
+
+  setStatus("✅ 已复制");
 }
+
+function getPassword(){
+
+  return document.getElementById("password").value;
+}
+
+function setStatus(text){
+
+  document.getElementById("status").innerText =
+    text;
+}
+
+init();
 </script>
 
 </body>
