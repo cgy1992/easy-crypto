@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>本地文本加解密</title>
+
+<style>
+body{
+  font-family:sans-serif;
+  max-width:900px;
+  margin:20px auto;
+  padding:16px;
+  background:#f5f5f5;
+}
+h2{
+  margin-bottom:10px;
+}
+textarea,input{
+  width:100%;
+  box-sizing:border-box;
+  margin-top:8px;
+  margin-bottom:16px;
+  padding:12px;
+  font-size:16px;
+}
+textarea{
+  min-height:160px;
+  resize:vertical;
+}
+button{
+  padding:12px 18px;
+  font-size:16px;
+  margin-right:10px;
+  margin-bottom:10px;
+  cursor:pointer;
+}
+.card{
+  background:white;
+  padding:16px;
+  border-radius:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+.tip{
+  color:#666;
+  font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>本地文本加解密（AES-GCM）</h2>
+
+  <div class="tip">
+    所有加解密均在本地浏览器完成，不上传服务器。<br>
+    支持 Windows / macOS / Linux / Android / iPhone。
+  </div>
+
+  <label>输入文本（明文或密文 JSON）</label>
+  <textarea id="input"></textarea>
+
+  <label>密码</label>
+  <input id="password" type="password" placeholder="请输入密码" />
+
+  <button onclick="encryptText()">加密</button>
+  <button onclick="decryptText()">解密</button>
+  <button onclick="copyOutput()">复制结果</button>
+
+  <label>结果</label>
+  <textarea id="output" readonly></textarea>
+</div>
+
+<script>
+function bytesToBase64(bytes) {
+  let binary = "";
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary);
+}
+
+function base64ToBytes(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+async function deriveKey(password, salt) {
+  const enc = new TextEncoder();
+
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveKey"]
+  );
+
+  return crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt,
+      iterations: 100000,
+      hash: "SHA-256"
+    },
+    keyMaterial,
+    {
+      name: "AES-GCM",
+      length: 256
+    },
+    false,
+    ["encrypt", "decrypt"]
+  );
+}
+
+async function encryptText() {
+  try {
+    const text = document.getElementById("input").value;
+    const password = document.getElementById("password").value;
+
+    if (!text || !password) {
+      alert("请输入文本和密码");
+      return;
+    }
+
+    const enc = new TextEncoder();
+
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+
+    const key = await deriveKey(password, salt);
+
+    const encrypted = await crypto.subtle.encrypt(
+      {
+        name: "AES-GCM",
+        iv
+      },
+      key,
+      enc.encode(text)
+    );
+
+    const result = {
+      v: 1,
+      salt: bytesToBase64(salt),
+      iv: bytesToBase64(iv),
+      data: bytesToBase64(new Uint8Array(encrypted))
+    };
+
+    document.getElementById("output").value =
+      JSON.stringify(result);
+  } catch (e) {
+    alert("加密失败：" + e.message);
+  }
+}
+
+async function decryptText() {
+  try {
+    const input = document.getElementById("input").value;
+    const password = document.getElementById("password").value;
+
+    if (!input || !password) {
+      alert("请输入密文和密码");
+      return;
+    }
+
+    const obj = JSON.parse(input);
+
+    const salt = base64ToBytes(obj.salt);
+    const iv = base64ToBytes(obj.iv);
+    const data = base64ToBytes(obj.data);
+
+    const key = await deriveKey(password, salt);
+
+    const decrypted = await crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv
+      },
+      key,
+      data
+    );
+
+    const dec = new TextDecoder();
+
+    document.getElementById("output").value =
+      dec.decode(decrypted);
+
+  } catch (e) {
+    alert("解密失败：密码错误或密文损坏");
+  }
+}
+
+async function copyOutput() {
+  const text = document.getElementById("output").value;
+
+  if (!text) {
+    alert("没有可复制内容");
+    return;
+  }
+
+  await navigator.clipboard.writeText(text);
+  alert("已复制");
+}
+</script>
+
+</body>
+</html>
