@@ -28,7 +28,7 @@ body{
 }
 
 h1{
-  margin:0 0 10px;
+  margin:0 0 12px;
   font-size:28px;
 }
 
@@ -105,6 +105,7 @@ button.success{
   margin-top:14px;
   color:#6b7280;
   font-size:14px;
+  line-height:1.6;
 }
 
 .hidden{
@@ -157,32 +158,37 @@ button.success{
   <div class="tip">
     所有加解密均在浏览器本地完成。<br>
     支持：
-    <br>• 本地模式（文件下载/上传）
-    <br>• GitHub 仓库模式（自动保存）
+    <br>• 本地文件模式（离线可用）
+    <br>• GitHub 仓库模式（自动同步）
   </div>
 
   <div class="row">
 
     <div>
+
       <label>模式</label>
 
       <select id="mode">
         <option value="local">本地文件模式</option>
         <option value="github">GitHub 仓库模式</option>
       </select>
+
     </div>
 
     <div id="githubFileArea">
+
       <label>仓库文件</label>
 
       <select id="fileList">
         <option value="">请选择文件</option>
       </select>
+
     </div>
 
   </div>
 
   <label>文件名</label>
+
   <input id="fileName" placeholder="例如：note1.json" />
 
   <div id="localArea">
@@ -240,9 +246,12 @@ mode.addEventListener("change", updateModeUI);
 
 function updateModeUI(){
 
-  const githubMode = mode.value === "github";
+  const githubMode =
+    mode.value === "github";
 
-  document.getElementById("githubFileArea").style.display =
+  document.getElementById(
+    "githubFileArea"
+  ).style.display =
     githubMode ? "block" : "none";
 }
 
@@ -252,19 +261,28 @@ async function init(){
 
   if(location.protocol === "file:"){
 
-    setStatus("✅ 当前为本地模式（未连接 GitHub）");
+    setStatus(
+      "✅ 当前为本地模式（离线）"
+    );
+
     return;
   }
 
   try{
 
-    const res = await fetch("./config.json");
+    const res =
+      await fetch("./config.json");
 
     if(!res.ok){
       throw new Error();
     }
 
     CONFIG = await res.json();
+
+    CONFIG.token =
+      decodeToken(
+        CONFIG.token_enc
+      );
 
     setStatus(
       `✅ 已连接 GitHub：${CONFIG.owner}/${CONFIG.repo}`
@@ -275,7 +293,30 @@ async function init(){
   }catch(e){
 
     setStatus(
-      "⚠️ 未找到 config.json，仅支持本地模式"
+      "⚠️ 未检测到 config.json，仅支持本地模式"
+    );
+  }
+}
+
+function decodeToken(enc){
+
+  try{
+
+    const data =
+      enc.split("")
+      .reverse()
+      .join("");
+
+    const raw = atob(data);
+
+    const parts = raw.split("|");
+
+    return parts.join("");
+
+  }catch(e){
+
+    throw new Error(
+      "token 解码失败"
     );
   }
 }
@@ -284,7 +325,9 @@ function bytesToBase64(bytes){
 
   let binary = "";
 
-  bytes.forEach(b => binary += String.fromCharCode(b));
+  bytes.forEach(
+    b => binary += String.fromCharCode(b)
+  );
 
   return btoa(binary);
 }
@@ -293,10 +336,13 @@ function base64ToBytes(base64){
 
   const binary = atob(base64);
 
-  const bytes = new Uint8Array(binary.length);
+  const bytes =
+    new Uint8Array(binary.length);
 
   for(let i=0;i<binary.length;i++){
-    bytes[i] = binary.charCodeAt(i);
+
+    bytes[i] =
+      binary.charCodeAt(i);
   }
 
   return bytes;
@@ -304,15 +350,17 @@ function base64ToBytes(base64){
 
 async function deriveKey(password, salt){
 
-  const enc = new TextEncoder();
+  const enc =
+    new TextEncoder();
 
-  const keyMaterial = await crypto.subtle.importKey(
-    "raw",
-    enc.encode(password),
-    { name:"PBKDF2" },
-    false,
-    ["deriveKey"]
-  );
+  const keyMaterial =
+    await crypto.subtle.importKey(
+      "raw",
+      enc.encode(password),
+      { name:"PBKDF2" },
+      false,
+      ["deriveKey"]
+    );
 
   return crypto.subtle.deriveKey(
     {
@@ -339,30 +387,39 @@ async function encryptText(){
     const password = getPassword();
 
     if(!text || !password){
+
       alert("请输入内容和密码");
       return;
     }
 
-    const enc = new TextEncoder();
+    const enc =
+      new TextEncoder();
 
-    const salt = crypto.getRandomValues(
-      new Uint8Array(16)
-    );
+    const salt =
+      crypto.getRandomValues(
+        new Uint8Array(16)
+      );
 
-    const iv = crypto.getRandomValues(
-      new Uint8Array(12)
-    );
+    const iv =
+      crypto.getRandomValues(
+        new Uint8Array(12)
+      );
 
-    const key = await deriveKey(password, salt);
+    const key =
+      await deriveKey(
+        password,
+        salt
+      );
 
-    const encrypted = await crypto.subtle.encrypt(
-      {
-        name:"AES-GCM",
-        iv
-      },
-      key,
-      enc.encode(text)
-    );
+    const encrypted =
+      await crypto.subtle.encrypt(
+        {
+          name:"AES-GCM",
+          iv
+        },
+        key,
+        enc.encode(text)
+      );
 
     const result = {
       v:1,
@@ -374,13 +431,14 @@ async function encryptText(){
     };
 
     const json =
-      JSON.stringify(result, null, 2);
+      JSON.stringify(result,null,2);
 
     output.value = json;
 
     if(mode.value === "github"){
 
       if(!CONFIG){
+
         alert("GitHub 未配置");
         return;
       }
@@ -390,14 +448,15 @@ async function encryptText(){
     }else{
 
       downloadLocalFile(json);
-
     }
 
     setStatus("✅ 加密完成");
 
   }catch(e){
 
-    alert("加密失败：" + e.message);
+    alert(
+      "加密失败：" + e.message
+    );
   }
 }
 
@@ -405,21 +464,36 @@ async function decryptText(){
 
   try{
 
-    const content = input.value;
-    const password = getPassword();
+    const content =
+      input.value;
+
+    const password =
+      getPassword();
 
     if(!content || !password){
+
       alert("请输入密文和密码");
+
       return;
     }
 
-    const obj = JSON.parse(content);
+    const obj =
+      JSON.parse(content);
 
-    const salt = base64ToBytes(obj.salt);
-    const iv = base64ToBytes(obj.iv);
-    const data = base64ToBytes(obj.data);
+    const salt =
+      base64ToBytes(obj.salt);
 
-    const key = await deriveKey(password, salt);
+    const iv =
+      base64ToBytes(obj.iv);
+
+    const data =
+      base64ToBytes(obj.data);
+
+    const key =
+      await deriveKey(
+        password,
+        salt
+      );
 
     const decrypted =
       await crypto.subtle.decrypt(
@@ -431,7 +505,8 @@ async function decryptText(){
         data
       );
 
-    const dec = new TextDecoder();
+    const dec =
+      new TextDecoder();
 
     output.value =
       dec.decode(decrypted);
@@ -440,15 +515,19 @@ async function decryptText(){
 
   }catch(e){
 
-    alert("解密失败：密码错误或密文损坏");
+    alert(
+      "解密失败：密码错误或密文损坏"
+    );
   }
 }
 
 async function saveToGitHub(content){
 
-  const path = fileName.value.trim();
+  const path =
+    fileName.value.trim();
 
   if(!path){
+
     alert("请输入文件名");
     return;
   }
@@ -458,54 +537,69 @@ async function saveToGitHub(content){
 
   let sha = null;
 
-  const check = await fetch(api,{
-    headers:{
-      Authorization:`Bearer ${CONFIG.token}`
-    }
-  });
+  const check =
+    await fetch(api,{
+      headers:{
+        Authorization:
+          `Bearer ${CONFIG.token}`
+      }
+    });
 
   if(check.ok){
 
-    const file = await check.json();
+    const file =
+      await check.json();
 
     sha = file.sha;
   }
 
-  const res = await fetch(api,{
-    method:"PUT",
-    headers:{
-      Authorization:`Bearer ${CONFIG.token}`,
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      message:`update ${path}`,
-      content:btoa(
-        unescape(
-          encodeURIComponent(content)
-        )
-      ),
-      sha
-    })
-  });
+  const res =
+    await fetch(api,{
+      method:"PUT",
+      headers:{
+        Authorization:
+          `Bearer ${CONFIG.token}`,
+        "Content-Type":
+          "application/json"
+      },
+      body:JSON.stringify({
+        message:`update ${path}`,
+        content:btoa(
+          unescape(
+            encodeURIComponent(content)
+          )
+        ),
+        sha
+      })
+    });
 
   if(!res.ok){
-    throw new Error("GitHub 保存失败");
+
+    throw new Error(
+      "GitHub 保存失败"
+    );
   }
 
   await loadFileList();
 
-  setStatus("✅ 已保存到 GitHub");
+  setStatus(
+    "✅ 已保存到 GitHub"
+  );
 }
 
 function downloadLocalFile(content){
 
   const path =
-    fileName.value.trim() || "encrypted.json";
+    fileName.value.trim()
+    || "encrypted.json";
 
-  const blob = new Blob(
-    [content],
-    { type:"application/json" }
-  );
+  const blob =
+    new Blob(
+      [content],
+      {
+        type:"application/json"
+      }
+    );
 
   const url =
     URL.createObjectURL(blob);
@@ -520,7 +614,9 @@ function downloadLocalFile(content){
 
   URL.revokeObjectURL(url);
 
-  setStatus("✅ 已下载到本地");
+  setStatus(
+    "✅ 已下载到本地"
+  );
 }
 
 async function loadFileList(){
@@ -530,109 +626,142 @@ async function loadFileList(){
   const api =
     `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents`;
 
-  const res = await fetch(api,{
-    headers:{
-      Authorization:`Bearer ${CONFIG.token}`
-    }
-  });
+  const res =
+    await fetch(api,{
+      headers:{
+        Authorization:
+          `Bearer ${CONFIG.token}`
+      }
+    });
 
-  const files = await res.json();
+  const files =
+    await res.json();
 
   fileList.innerHTML =
     `<option value="">请选择文件</option>`;
 
   files.forEach(file => {
 
-    if(file.type !== "file") return;
+    if(file.type !== "file")
+      return;
 
     const option =
       document.createElement("option");
 
-    option.value = file.path;
-    option.innerText = file.name;
+    option.value =
+      file.path;
+
+    option.innerText =
+      file.name;
 
     fileList.appendChild(option);
 
   });
 }
 
-fileList.addEventListener("change", async ()=>{
+fileList.addEventListener(
+  "change",
+  async ()=>{
 
-  const path = fileList.value;
+    const path =
+      fileList.value;
 
-  if(!path) return;
+    if(!path) return;
 
-  fileName.value = path;
+    fileName.value = path;
 
-  const api =
-    `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`;
+    const api =
+      `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`;
 
-  const res = await fetch(api,{
-    headers:{
-      Authorization:`Bearer ${CONFIG.token}`
-    }
-  });
+    const res =
+      await fetch(api,{
+        headers:{
+          Authorization:
+            `Bearer ${CONFIG.token}`
+        }
+      });
 
-  const file = await res.json();
+    const file =
+      await res.json();
 
-  const content =
-    decodeURIComponent(
-      escape(
-        atob(
-          file.content.replace(/\n/g,"")
+    const content =
+      decodeURIComponent(
+        escape(
+          atob(
+            file.content
+            .replace(/\n/g,"")
+          )
         )
-      )
+      );
+
+    input.value =
+      content;
+
+    setStatus(
+      "✅ 文件已加载"
     );
-
-  input.value = content;
-
-  setStatus("✅ 文件已加载");
 });
 
-document.getElementById("localFileInput")
-.addEventListener("change", e => {
+document.getElementById(
+  "localFileInput"
+).addEventListener(
+  "change",
+  e => {
 
-  const file = e.target.files[0];
+    const file =
+      e.target.files[0];
 
-  if(!file) return;
+    if(!file) return;
 
-  fileName.value = file.name;
+    fileName.value =
+      file.name;
 
-  const reader = new FileReader();
+    const reader =
+      new FileReader();
 
-  reader.onload = ev => {
+    reader.onload = ev => {
 
-    input.value = ev.target.result;
+      input.value =
+        ev.target.result;
 
-    setStatus("✅ 本地文件已加载");
-  };
+      setStatus(
+        "✅ 本地文件已加载"
+      );
+    };
 
-  reader.readAsText(file);
+    reader.readAsText(file);
 });
 
 async function copyOutput(){
 
-  const text = output.value;
+  const text =
+    output.value;
 
   if(!text){
+
     alert("没有可复制内容");
+
     return;
   }
 
-  await navigator.clipboard.writeText(text);
+  await navigator.clipboard
+  .writeText(text);
 
   setStatus("✅ 已复制");
 }
 
 function getPassword(){
 
-  return document.getElementById("password").value;
+  return document
+    .getElementById("password")
+    .value;
 }
 
 function setStatus(text){
 
-  document.getElementById("status").innerText =
-    text;
+  document
+    .getElementById("status")
+    .innerText = text;
 }
 
 init();
