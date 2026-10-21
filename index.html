@@ -1,152 +1,197 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>加密笔记</title>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1.0"
+>
+
+<title>🔐 加密笔记</title>
 
 <style>
+
 *{
   box-sizing:border-box;
 }
 
 body{
+
   margin:0;
-  padding:16px;
-  background:#f3f4f6;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  color:#111827;
+  padding:20px;
+
+  background:#f5f7fb;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 }
 
 .card{
-  max-width:920px;
+
+  max-width:900px;
+
   margin:auto;
+
   background:#fff;
-  border-radius:18px;
-  padding:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
+
+  border-radius:16px;
+
+  padding:24px;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.08);
 }
 
 h1{
-  margin:0 0 12px;
-  font-size:28px;
+
+  margin-top:0;
 }
 
 .tip{
-  background:#eef6ff;
-  border-radius:12px;
-  padding:12px;
+
+  background:#eef5ff;
+
+  color:#245;
+
+  padding:14px;
+
+  border-radius:10px;
+
   line-height:1.7;
-  margin-bottom:18px;
-  color:#374151;
-}
 
-label{
-  display:block;
-  margin-top:16px;
-  margin-bottom:6px;
-  font-weight:600;
-}
-
-textarea,
-input,
-select{
-  width:100%;
-  border:1px solid #d1d5db;
-  border-radius:12px;
-  padding:12px;
-  font-size:16px;
-  background:#fff;
-}
-
-textarea{
-  min-height:220px;
-  resize:vertical;
+  margin-bottom:20px;
 }
 
 .row{
+
   display:flex;
-  gap:12px;
+
+  gap:16px;
+
+  flex-wrap:wrap;
 }
 
 .row > div{
+
   flex:1;
+}
+
+label{
+
+  display:block;
+
+  margin-top:16px;
+  margin-bottom:8px;
+
+  font-weight:600;
+}
+
+input,
+select,
+textarea,
+button{
+
+  width:100%;
+
+  border:1px solid #d0d7e2;
+
+  border-radius:10px;
+
+  padding:12px;
+
+  font-size:14px;
+}
+
+textarea{
+
+  min-height:180px;
+
+  resize:vertical;
+
+  font-family:
+    Consolas,
+    monospace;
 }
 
 .actions{
+
   display:flex;
+
   gap:12px;
+
   flex-wrap:wrap;
+
   margin-top:18px;
 }
 
-button{
+.actions button{
+
   flex:1;
+
   min-width:120px;
-  border:none;
-  border-radius:12px;
-  padding:14px;
-  font-size:16px;
-  font-weight:700;
-  cursor:pointer;
-  background:#2563eb;
-  color:white;
 }
 
-button.secondary{
-  background:#6b7280;
+button{
+
+  border:none;
+
+  background:#2563eb;
+
+  color:#fff;
+
+  cursor:pointer;
+
+  font-weight:600;
+
+  transition:.2s;
+}
+
+button:hover{
+
+  opacity:.92;
 }
 
 button.success{
-  background:#059669;
+
+  background:#16a34a;
+}
+
+button.secondary{
+
+  background:#64748b;
 }
 
 .info{
-  margin-top:14px;
-  color:#6b7280;
-  font-size:14px;
-  line-height:1.6;
+
+  margin-top:18px;
+
+  padding:12px;
+
+  border-radius:10px;
+
+  background:#f1f5f9;
+
+  color:#334155;
+
+  word-break:break-all;
 }
 
-.hidden{
-  display:none;
-}
+@media(max-width:640px){
 
-@media(max-width:700px){
-  .row{
+  .actions{
+
     flex-direction:column;
   }
 }
 
-@media(prefers-color-scheme:dark){
-
-  body{
-    background:#0d1117;
-    color:#e6edf3;
-  }
-
-  .card{
-    background:#161b22;
-  }
-
-  textarea,
-  input,
-  select{
-    background:#0d1117;
-    color:#e6edf3;
-    border:1px solid #30363d;
-  }
-
-  .tip{
-    background:#1f2937;
-    color:#cbd5e1;
-  }
-
-  .info{
-    color:#9ca3af;
-  }
-}
 </style>
+
 </head>
 
 <body>
@@ -157,9 +202,9 @@ button.success{
 
   <div class="tip">
     所有加解密均在浏览器本地完成。<br>
-    支持：
-    <br>• 本地文件模式（离线可用）
-    <br>• GitHub 仓库模式（自动同步）
+    支持：<br>
+    • 本地文件模式（离线可用）<br>
+    • GitHub 仓库模式（自动同步）
   </div>
 
   <div class="row">
@@ -169,8 +214,15 @@ button.success{
       <label>模式</label>
 
       <select id="mode">
-        <option value="local">本地文件模式</option>
-        <option value="github">GitHub 仓库模式</option>
+
+        <option value="local">
+          本地文件模式
+        </option>
+
+        <option value="github">
+          GitHub 仓库模式
+        </option>
+
       </select>
 
     </div>
@@ -180,7 +232,11 @@ button.success{
       <label>仓库文件</label>
 
       <select id="fileList">
-        <option value="">请选择文件</option>
+
+        <option value="">
+          请选择文件
+        </option>
+
       </select>
 
     </div>
@@ -189,23 +245,35 @@ button.success{
 
   <label>文件名</label>
 
-  <input id="fileName" placeholder="例如：note1.json" />
+  <input
+    id="fileName"
+    placeholder="例如：note1.json"
+  >
 
   <div id="localArea">
 
     <label>导入本地文件</label>
 
-    <input type="file" id="localFileInput" />
+    <input
+      type="file"
+      id="localFileInput"
+    >
 
   </div>
 
-  <label>输入内容（明文或密文 JSON）</label>
+  <label>
+    输入内容（明文或密文 JSON）
+  </label>
 
   <textarea id="input"></textarea>
 
   <label>密码</label>
 
-  <input id="password" type="password" placeholder="请输入密码" />
+  <input
+    id="password"
+    type="password"
+    placeholder="请输入密码"
+  >
 
   <div class="actions">
 
@@ -213,11 +281,21 @@ button.success{
       加密并保存
     </button>
 
-    <button class="success" onclick="decryptText()">
+    <button onclick="saveCurrentText()">
+      直接保存
+    </button>
+
+    <button
+      class="success"
+      onclick="decryptText()"
+    >
       解密
     </button>
 
-    <button class="secondary" onclick="copyOutput()">
+    <button
+      class="secondary"
+      onclick="copyOutput()"
+    >
       复制结果
     </button>
 
@@ -225,24 +303,43 @@ button.success{
 
   <label>结果</label>
 
-  <textarea id="output" readonly></textarea>
+  <textarea
+    id="output"
+    readonly
+  ></textarea>
 
-  <div class="info" id="status">
+  <div
+    class="info"
+    id="status"
+  >
     正在初始化...
   </div>
 
 </div>
 
 <script>
+
 let CONFIG = null;
 
-const mode = document.getElementById("mode");
-const input = document.getElementById("input");
-const output = document.getElementById("output");
-const fileName = document.getElementById("fileName");
-const fileList = document.getElementById("fileList");
+const mode =
+  document.getElementById("mode");
 
-mode.addEventListener("change", updateModeUI);
+const input =
+  document.getElementById("input");
+
+const output =
+  document.getElementById("output");
+
+const fileName =
+  document.getElementById("fileName");
+
+const fileList =
+  document.getElementById("fileList");
+
+mode.addEventListener(
+  "change",
+  updateModeUI
+);
 
 function updateModeUI(){
 
@@ -252,7 +349,16 @@ function updateModeUI(){
   document.getElementById(
     "githubFileArea"
   ).style.display =
-    githubMode ? "block" : "none";
+    githubMode
+      ? "block"
+      : "none";
+
+  document.getElementById(
+    "localArea"
+  ).style.display =
+    githubMode
+      ? "none"
+      : "block";
 }
 
 async function init(){
@@ -271,13 +377,23 @@ async function init(){
   try{
 
     const res =
-      await fetch("./config.json");
+      await fetch(
+        "./config.json?t=" +
+        Date.now(),
+        {
+          cache:"no-store"
+        }
+      );
 
     if(!res.ok){
-      throw new Error();
+
+      throw new Error(
+        "config.json 不存在"
+      );
     }
 
-    CONFIG = await res.json();
+    CONFIG =
+      await res.json();
 
     CONFIG.token =
       decodeToken(
@@ -288,9 +404,15 @@ async function init(){
       `✅ 已连接 GitHub：${CONFIG.owner}/${CONFIG.repo}`
     );
 
+    mode.value = "github";
+
+    updateModeUI();
+
     await loadFileList();
 
   }catch(e){
+
+    console.error(e);
 
     setStatus(
       "⚠️ 未检测到 config.json，仅支持本地模式"
@@ -303,11 +425,13 @@ function decodeToken(enc){
   try{
 
     const data =
-      enc.split("")
+      enc
+      .split("")
       .reverse()
       .join("");
 
-    const raw = atob(data);
+    const raw =
+      atob(data);
 
     return raw.replace(
       "github|pat|",
@@ -322,13 +446,15 @@ function decodeToken(enc){
   }
 }
 
-
 function bytesToBase64(bytes){
 
   let binary = "";
 
   bytes.forEach(
-    b => binary += String.fromCharCode(b)
+    b => {
+      binary +=
+        String.fromCharCode(b);
+    }
   );
 
   return btoa(binary);
@@ -336,12 +462,19 @@ function bytesToBase64(bytes){
 
 function base64ToBytes(base64){
 
-  const binary = atob(base64);
+  const binary =
+    atob(base64);
 
   const bytes =
-    new Uint8Array(binary.length);
+    new Uint8Array(
+      binary.length
+    );
 
-  for(let i=0;i<binary.length;i++){
+  for(
+    let i = 0;
+    i < binary.length;
+    i++
+  ){
 
     bytes[i] =
       binary.charCodeAt(i);
@@ -350,7 +483,10 @@ function base64ToBytes(base64){
   return bytes;
 }
 
-async function deriveKey(password, salt){
+async function deriveKey(
+  password,
+  salt
+){
 
   const enc =
     new TextEncoder();
@@ -359,7 +495,9 @@ async function deriveKey(password, salt){
     await crypto.subtle.importKey(
       "raw",
       enc.encode(password),
-      { name:"PBKDF2" },
+      {
+        name:"PBKDF2"
+      },
       false,
       ["deriveKey"]
     );
@@ -377,7 +515,10 @@ async function deriveKey(password, salt){
       length:256
     },
     false,
-    ["encrypt","decrypt"]
+    [
+      "encrypt",
+      "decrypt"
+    ]
   );
 }
 
@@ -385,12 +526,21 @@ async function encryptText(){
 
   try{
 
-    const text = input.value;
-    const password = getPassword();
+    const text =
+      input.value;
 
-    if(!text || !password){
+    const password =
+      getPassword();
 
-      alert("请输入内容和密码");
+    if(
+      !text ||
+      !password
+    ){
+
+      alert(
+        "请输入内容和密码"
+      );
+
       return;
     }
 
@@ -424,40 +574,66 @@ async function encryptText(){
       );
 
     const result = {
+
       v:1,
-      salt:bytesToBase64(salt),
-      iv:bytesToBase64(iv),
-      data:bytesToBase64(
-        new Uint8Array(encrypted)
-      )
+
+      salt:
+        bytesToBase64(salt),
+
+      iv:
+        bytesToBase64(iv),
+
+      data:
+        bytesToBase64(
+          new Uint8Array(
+            encrypted
+          )
+        )
     };
 
     const json =
-      JSON.stringify(result,null,2);
+      JSON.stringify(
+        result,
+        null,
+        2
+      );
 
-    output.value = json;
+    output.value =
+      json;
 
-    if(mode.value === "github"){
+    if(
+      mode.value === "github"
+    ){
 
       if(!CONFIG){
 
-        alert("GitHub 未配置");
+        alert(
+          "GitHub 未配置"
+        );
+
         return;
       }
 
-      await saveToGitHub(json);
+      await saveToGitHub(
+        json
+      );
 
     }else{
 
-      downloadLocalFile(json);
+      downloadLocalFile(
+        json
+      );
     }
 
-    setStatus("✅ 加密完成");
+    setStatus(
+      "✅ 加密完成"
+    );
 
   }catch(e){
 
     alert(
-      "加密失败：" + e.message
+      "加密失败：" +
+      e.message
     );
   }
 }
@@ -472,9 +648,14 @@ async function decryptText(){
     const password =
       getPassword();
 
-    if(!content || !password){
+    if(
+      !content ||
+      !password
+    ){
 
-      alert("请输入密文和密码");
+      alert(
+        "请输入密文和密码"
+      );
 
       return;
     }
@@ -483,13 +664,19 @@ async function decryptText(){
       JSON.parse(content);
 
     const salt =
-      base64ToBytes(obj.salt);
+      base64ToBytes(
+        obj.salt
+      );
 
     const iv =
-      base64ToBytes(obj.iv);
+      base64ToBytes(
+        obj.iv
+      );
 
     const data =
-      base64ToBytes(obj.data);
+      base64ToBytes(
+        obj.data
+      );
 
     const key =
       await deriveKey(
@@ -511,9 +698,13 @@ async function decryptText(){
       new TextDecoder();
 
     output.value =
-      dec.decode(decrypted);
+      dec.decode(
+        decrypted
+      );
 
-    setStatus("✅ 解密成功");
+    setStatus(
+      "✅ 解密成功"
+    );
 
   }catch(e){
 
@@ -523,14 +714,72 @@ async function decryptText(){
   }
 }
 
-async function saveToGitHub(content){
+async function saveCurrentText(){
+
+  try{
+
+    const content =
+      input.value;
+
+    if(!content){
+
+      alert(
+        "没有可保存内容"
+      );
+
+      return;
+    }
+
+    if(
+      mode.value === "github"
+    ){
+
+      if(!CONFIG){
+
+        alert(
+          "GitHub 未配置"
+        );
+
+        return;
+      }
+
+      await saveToGitHub(
+        content
+      );
+
+    }else{
+
+      downloadLocalFile(
+        content
+      );
+    }
+
+    setStatus(
+      "✅ 文件已保存"
+    );
+
+  }catch(e){
+
+    alert(
+      "保存失败：" +
+      e.message
+    );
+  }
+}
+
+async function saveToGitHub(
+  content
+){
 
   const path =
     fileName.value.trim();
 
   if(!path){
 
-    alert("请输入文件名");
+    alert(
+      "请输入文件名"
+    );
+
     return;
   }
 
@@ -540,40 +789,57 @@ async function saveToGitHub(content){
   let sha = null;
 
   const check =
-    await fetch(api,{
-      headers:{
-        Authorization:
-          `Bearer ${CONFIG.token}`
+    await fetch(
+      api,
+      {
+        headers:{
+          Authorization:
+            `Bearer ${CONFIG.token}`
+        }
       }
-    });
+    );
 
   if(check.ok){
 
     const file =
       await check.json();
 
-    sha = file.sha;
+    sha =
+      file.sha;
   }
 
   const res =
-    await fetch(api,{
-      method:"PUT",
-      headers:{
-        Authorization:
-          `Bearer ${CONFIG.token}`,
-        "Content-Type":
-          "application/json"
-      },
-      body:JSON.stringify({
-        message:`update ${path}`,
-        content:btoa(
-          unescape(
-            encodeURIComponent(content)
-          )
-        ),
-        sha
-      })
-    });
+    await fetch(
+      api,
+      {
+        method:"PUT",
+
+        headers:{
+          Authorization:
+            `Bearer ${CONFIG.token}`,
+
+          "Content-Type":
+            "application/json"
+        },
+
+        body:JSON.stringify({
+
+          message:
+            `update ${path}`,
+
+          content:
+            btoa(
+              unescape(
+                encodeURIComponent(
+                  content
+                )
+              )
+            ),
+
+          sha
+        })
+      }
+    );
 
   if(!res.ok){
 
@@ -589,7 +855,9 @@ async function saveToGitHub(content){
   );
 }
 
-function downloadLocalFile(content){
+function downloadLocalFile(
+  content
+){
 
   const path =
     fileName.value.trim()
@@ -599,22 +867,32 @@ function downloadLocalFile(content){
     new Blob(
       [content],
       {
-        type:"application/json"
+        type:
+          "application/json"
       }
     );
 
   const url =
-    URL.createObjectURL(blob);
+    URL.createObjectURL(
+      blob
+    );
 
   const a =
-    document.createElement("a");
+    document.createElement(
+      "a"
+    );
 
-  a.href = url;
-  a.download = path;
+  a.href =
+    url;
+
+  a.download =
+    path;
 
   a.click();
 
-  URL.revokeObjectURL(url);
+  URL.revokeObjectURL(
+    url
+  );
 
   setStatus(
     "✅ 已下载到本地"
@@ -623,32 +901,50 @@ function downloadLocalFile(content){
 
 async function loadFileList(){
 
-  if(!CONFIG) return;
+  if(!CONFIG)
+    return;
 
   const api =
     `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents`;
 
   const res =
-    await fetch(api,{
-      headers:{
-        Authorization:
-          `Bearer ${CONFIG.token}`
+    await fetch(
+      api,
+      {
+        headers:{
+          Authorization:
+            `Bearer ${CONFIG.token}`
+        }
       }
-    });
+    );
+
+  if(!res.ok){
+
+    throw new Error(
+      "读取仓库失败"
+    );
+  }
 
   const files =
     await res.json();
 
   fileList.innerHTML =
-    `<option value="">请选择文件</option>`;
+    `
+      <option value="">
+        请选择文件
+      </option>
+    `;
 
-  files.forEach(file => {
+  files.forEach(file=>{
 
-    if(file.type !== "file")
-      return;
+    if(
+      file.type !== "file"
+    ) return;
 
     const option =
-      document.createElement("option");
+      document.createElement(
+        "option"
+      );
 
     option.value =
       file.path;
@@ -656,32 +952,39 @@ async function loadFileList(){
     option.innerText =
       file.name;
 
-    fileList.appendChild(option);
-
+    fileList.appendChild(
+      option
+    );
   });
 }
 
 fileList.addEventListener(
   "change",
+
   async ()=>{
 
     const path =
       fileList.value;
 
-    if(!path) return;
+    if(!path)
+      return;
 
-    fileName.value = path;
+    fileName.value =
+      path;
 
     const api =
       `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`;
 
     const res =
-      await fetch(api,{
-        headers:{
-          Authorization:
-            `Bearer ${CONFIG.token}`
+      await fetch(
+        api,
+        {
+          headers:{
+            Authorization:
+              `Bearer ${CONFIG.token}`
+          }
         }
-      });
+      );
 
     const file =
       await res.json();
@@ -691,7 +994,10 @@ fileList.addEventListener(
         escape(
           atob(
             file.content
-            .replace(/\n/g,"")
+            .replace(
+              /\n/g,
+              ""
+            )
           )
         )
       );
@@ -702,18 +1008,23 @@ fileList.addEventListener(
     setStatus(
       "✅ 文件已加载"
     );
-});
+  }
+);
 
-document.getElementById(
+document
+.getElementById(
   "localFileInput"
-).addEventListener(
+)
+.addEventListener(
   "change",
-  e => {
+
+  e=>{
 
     const file =
       e.target.files[0];
 
-    if(!file) return;
+    if(!file)
+      return;
 
     fileName.value =
       file.name;
@@ -721,18 +1032,22 @@ document.getElementById(
     const reader =
       new FileReader();
 
-    reader.onload = ev => {
+    reader.onload =
+      ev=>{
 
-      input.value =
-        ev.target.result;
+        input.value =
+          ev.target.result;
 
-      setStatus(
-        "✅ 本地文件已加载"
-      );
-    };
+        setStatus(
+          "✅ 本地文件已加载"
+        );
+      };
 
-    reader.readAsText(file);
-});
+    reader.readAsText(
+      file
+    );
+  }
+);
 
 async function copyOutput(){
 
@@ -741,32 +1056,43 @@ async function copyOutput(){
 
   if(!text){
 
-    alert("没有可复制内容");
+    alert(
+      "没有可复制内容"
+    );
 
     return;
   }
 
-  await navigator.clipboard
+  await navigator
+  .clipboard
   .writeText(text);
 
-  setStatus("✅ 已复制");
+  setStatus(
+    "✅ 已复制"
+  );
 }
 
 function getPassword(){
 
   return document
-    .getElementById("password")
+    .getElementById(
+      "password"
+    )
     .value;
 }
 
 function setStatus(text){
 
   document
-    .getElementById("status")
-    .innerText = text;
+    .getElementById(
+      "status"
+    )
+    .innerText =
+      text;
 }
 
 init();
+
 </script>
 
 </body>
