@@ -10,7 +10,7 @@
   content="width=device-width,initial-scale=1.0"
 >
 
-<title>🔐 加密笔记</title>
+<title>🔐 GitTest测试</title>
 
 <style>
 
@@ -178,6 +178,10 @@ button.secondary{
   background:#f1f5f9;
 
   color:#334155;
+
+  line-height:1.6;
+
+  white-space:pre-wrap;
 
   word-break:break-all;
 }
@@ -356,9 +360,20 @@ function updateModeUI(){
   document.getElementById(
     "localArea"
   ).style.display =
-    githubMode
-      ? "none"
-      : "block";
+    "block";
+
+  if(githubMode){
+
+    setStatus(
+      "☁️ 当前模式：GitHub 仓库模式"
+    );
+
+  }else{
+
+    setStatus(
+      "💻 当前模式：本地文件模式"
+    );
+  }
 }
 
 async function init(){
@@ -368,7 +383,7 @@ async function init(){
   if(location.protocol === "file:"){
 
     setStatus(
-      "✅ 当前为本地模式（离线）"
+      "💻 当前为本地模式（离线）"
     );
 
     return;
@@ -400,15 +415,17 @@ async function init(){
         CONFIG.token_enc
       );
 
-    setStatus(
-      `✅ 已连接 GitHub：${CONFIG.owner}/${CONFIG.repo}`
-    );
-
     mode.value = "github";
 
     updateModeUI();
 
     await loadFileList();
+
+    setStatus(
+      `✅ 已连接 GitHub：
+
+${CONFIG.owner}/${CONFIG.repo}`
+    );
 
   }catch(e){
 
@@ -605,29 +622,18 @@ async function encryptText(){
       mode.value === "github"
     ){
 
-      if(!CONFIG){
-
-        alert(
-          "GitHub 未配置"
-        );
-
-        return;
-      }
-
       await saveToGitHub(
-        json
+        json,
+        true
       );
 
     }else{
 
       downloadLocalFile(
-        json
+        json,
+        true
       );
     }
-
-    setStatus(
-      "✅ 加密完成"
-    );
 
   }catch(e){
 
@@ -734,29 +740,18 @@ async function saveCurrentText(){
       mode.value === "github"
     ){
 
-      if(!CONFIG){
-
-        alert(
-          "GitHub 未配置"
-        );
-
-        return;
-      }
-
       await saveToGitHub(
-        content
+        content,
+        false
       );
 
     }else{
 
       downloadLocalFile(
-        content
+        content,
+        false
       );
     }
-
-    setStatus(
-      "✅ 文件已保存"
-    );
 
   }catch(e){
 
@@ -768,8 +763,18 @@ async function saveCurrentText(){
 }
 
 async function saveToGitHub(
-  content
+  content,
+  encrypted
 ){
+
+  if(!CONFIG){
+
+    alert(
+      "GitHub 未配置"
+    );
+
+    return;
+  }
 
   const path =
     fileName.value.trim();
@@ -851,12 +856,22 @@ async function saveToGitHub(
   await loadFileList();
 
   setStatus(
-    "✅ 已保存到 GitHub"
+`✅ 已保存到 GitHub
+
+仓库：
+${CONFIG.owner}/${CONFIG.repo}
+
+文件：
+${path}
+
+形式：
+${encrypted ? "加密保存" : "直接保存"}`
   );
 }
 
 function downloadLocalFile(
-  content
+  content,
+  encrypted
 ){
 
   const path =
@@ -895,7 +910,13 @@ function downloadLocalFile(
   );
 
   setStatus(
-    "✅ 已下载到本地"
+`✅ 已保存到本地
+
+文件：
+${path}
+
+形式：
+${encrypted ? "加密保存" : "直接保存"}`
   );
 }
 
@@ -1006,7 +1027,13 @@ fileList.addEventListener(
       content;
 
     setStatus(
-      "✅ 文件已加载"
+`✅ GitHub 文件已加载
+
+仓库：
+${CONFIG.owner}/${CONFIG.repo}
+
+文件：
+${path}`
     );
   }
 );
@@ -1039,7 +1066,10 @@ document
           ev.target.result;
 
         setStatus(
-          "✅ 本地文件已加载"
+`✅ 本地文件已加载
+
+文件：
+${file.name}`
         );
       };
 
@@ -1068,7 +1098,7 @@ async function copyOutput(){
   .writeText(text);
 
   setStatus(
-    "✅ 已复制"
+    "✅ 已复制结果"
   );
 }
 
