@@ -309,9 +309,10 @@ function decodeToken(enc){
 
     const raw = atob(data);
 
-    const parts = raw.split("|");
-
-    return parts.join("");
+    return raw.replace(
+      "github|pat|",
+      "github_pat_"
+    );
 
   }catch(e){
 
@@ -320,6 +321,7 @@ function decodeToken(enc){
     );
   }
 }
+
 
 function bytesToBase64(bytes){
 
